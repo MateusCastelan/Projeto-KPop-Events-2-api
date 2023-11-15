@@ -45,9 +45,9 @@ router.get('/', async (req, res) => {
 router.get('/:pid', async (req, res) => {
   const pid = req.params.pid;
   try {
-    const foundedUser = await User.findById( pid );
+    const foundUser = await User.findById( pid );
     console.log('Objeto encontrado com sucesso!');
-    res.json({ message: 'Usuário encontrado com sucesso!', foundedUser });
+    res.json({ message: 'Usuário encontrado com sucesso!', foundUser });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -80,7 +80,6 @@ router.delete('/:pid', async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(pid);
     console.log('Objeto deletado:', deletedUser);
     res.json({ message: 'Usuário deletado com sucesso!', deletedUser });
-    //res.json(deletedUser);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

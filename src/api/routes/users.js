@@ -22,6 +22,7 @@ const User = mongoose.model('User', usersSchema);
 
 router.post('/', async (req, res) => {
   const user = req.body;
+  // const user = req.body.user;
   try {
     const newUser = await User.create(user);
     console.log('Objeto salvo com sucesso!');
@@ -55,6 +56,7 @@ router.get('/:pid', async (req, res) => {
 router.put('/:pid', async (req, res) => {
   const pid = req.params.pid;
   const newUser = req.body;
+  // const newUser = req.body.user;
   console.log(newUser);
   try {
     const updatedUser = await User.findByIdAndUpdate(pid, 

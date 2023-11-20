@@ -1,12 +1,24 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 mongoose.connect('mongodb+srv://web2kpop:Kpop2222@cluster0.kdjob5o.mongodb.net/');
 
 mongoose.connection.on('connected', () => {
   console.log('MongoDB conectado');
 });
+
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+
+router.use(cors(corsOptions));
 
 const usersSchema = new mongoose.Schema({
   author_name: String,
@@ -20,15 +32,43 @@ const usersSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', usersSchema);
 
+
 router.post('/', async (req, res) => {
   const user = req.body;
-  // const user = req.body.user;
+  
   try {
+    if (user.author_pwd) {
+      const hashedPassword = await bcrypt.hash(user.author_pwd, 10);
+      user.author_pwd = hashedPassword;
+    }
+
     const newUser = await User.create(user);
     console.log('Objeto salvo com sucesso!');
     res.json({ message: 'Usuário salvo com sucesso!', newUser });
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  console.log('Tentativa de login:', username);
+
+  try {
+    const user = await User.findOne({ author_user: username });
+
+    if (user) {
+      const verifyPassword = await bcrypt.compare(password, user.author_pwd);
+      if(verifyPassword){
+        res.status(200).json({ message: 'Login bem sucecido!'})
+      }
+  
+    } else {
+      res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

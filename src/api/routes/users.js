@@ -33,15 +33,17 @@ const usersSchema = new mongoose.Schema({
 const User = mongoose.model('User', usersSchema);
 
 
-router.post('/', async (req, res) => {
+router.post('/cadastro', async (req, res) => {
   const user = req.body;
   
+  console.log("Tentativa de cadastro", user)
+
   try {
     if (user.author_pwd) {
       const hashedPassword = await bcrypt.hash(user.author_pwd, 10);
       user.author_pwd = hashedPassword;
     }
-
+ 
     const newUser = await User.create(user);
     console.log('Objeto salvo com sucesso!');
     res.json({ message: 'Usuário salvo com sucesso!', newUser });
@@ -58,12 +60,11 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ author_user: username });
 
-    if (user) {
+    if (user && user.author_status) {
       const verifyPassword = await bcrypt.compare(password, user.author_pwd);
       if(verifyPassword){
         res.status(200).json({ message: 'Login bem sucecido!'})
-      }
-  
+      } 
     } else {
       res.status(401).json({ message: 'Credenciais inválidas' });
     }

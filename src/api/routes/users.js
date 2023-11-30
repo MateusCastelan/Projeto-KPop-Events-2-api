@@ -4,12 +4,6 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-mongoose.connect('mongodb+srv://web2kpop:Kpop2222@cluster0.kdjob5o.mongodb.net/');
-
-mongoose.connection.on('connected', () => {
-  console.log('MongoDB conectado');
-});
-
 const corsOptions = {
   origin: 'http://localhost:3000',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -63,6 +57,11 @@ router.post('/login', async (req, res) => {
     if (user && user.author_status) {
       const verifyPassword = await bcrypt.compare(password, user.author_pwd);
       if(verifyPassword){
+        req.session.user = {
+          _id: user._id,
+          author_name: user.author_name,
+          author_level: user.author_level,
+        };
         res.status(200).json({ message: 'Login bem sucecido!'})
       } 
     } else {
@@ -71,6 +70,32 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+router.get('/session', (req, res) => {
+  try {
+    if (req.session && req.session.user) {
+      res.status(200).json({ user: req.session.user });
+    } else {
+      res.status(200).json({ user: null });
+    }
+  } catch (error) {
+    console.error('Erro ao obter detalhes da sessão:', error.message);
+    res.status(500).json({ error: 'Erro ao obter detalhes da sessão' });
+  }
+});
+
+
+router.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Erro ao encerrar a sessão:', err);
+      res.status(500).json({ error: 'Erro ao encerrar a sessão' });
+    } else {
+      req.session = null
+      res.status(200).json({ message: 'Logout bem-sucedido!' });
+    }
+  });
 });
 
 router.get('/', async (req, res) => {

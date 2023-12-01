@@ -87,12 +87,11 @@ router.get('/session', (req, res) => {
 
 
 router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
+  req.session.destroy ((err) => {
     if (err) {
       console.error('Erro ao encerrar a sessão:', err);
       res.status(500).json({ error: 'Erro ao encerrar a sessão' });
     } else {
-      req.session = null
       res.status(200).json({ message: 'Logout bem-sucedido!' });
     }
   });

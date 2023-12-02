@@ -60,7 +60,8 @@ router.post('/login', async (req, res) => {
         req.session.user = {
           _id: user._id,
           author_name: user.author_name,
-          author_level: user.author_level,
+          author_email: user.author_email,
+          author_level: user.author_level
         };
         res.status(200).json({ message: 'Login bem sucecido!'})
       } 
@@ -121,7 +122,6 @@ router.get('/:pid', async (req, res) => {
 router.put('/:pid', async (req, res) => {
   const pid = req.params.pid;
   const newUser = req.body;
-  // const newUser = req.body.user;
   console.log(newUser);
   try {
     const updatedUser = await User.findByIdAndUpdate(pid, 

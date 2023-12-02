@@ -1,23 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { requireAuth } = require('../../middleware/auth');
 
 const articlesSchema = new mongoose.Schema({
     article_title: { type: String },
     article_body: { type: String },
     article_keywords: { type: String },
     article_liked_count: { type: Number, default: 0 },
-    article_published: { type: Boolean },
     article_featured: { type: Boolean },
+    article_summary: { type: String },
     article_author_email: { type: String },
+    article_author_name: {type: String},
+    article_author_id: {type: String},
     article_published_date: { type: Date, default: Date.now }
 });
   
 const Article = mongoose.model('Article', articlesSchema);
 
-router.post('/', async (req, res) => {
+router.post('/cadastro', async (req, res) => {
     const article = req.body;
-    // const article = req.body.article;
     try {
       const newArticle = await Article.create(article);
       console.log('Objeto salvo com sucesso!');
@@ -27,11 +29,23 @@ router.post('/', async (req, res) => {
     }
   });
 
-  router.get('/', async (req, res) => {
+  router.get('/', requireAuth, async (req, res) => {
     try {
-      const foundArticle = await Article.find();
+      let foundArticles;
+  
+      // Se o usuário for um administrador, obtenha todos os artigos
+      if (req.session.user && req.session.user.author_level === 'admin') {
+        foundArticles = await Article.find();
+      } else if (req.session.user) {
+        // Se não for um administrador, obtenha apenas os artigos do usuário atual
+        foundArticles = await Article.find({ article_author_id: req.session.user._id });
+      } else {
+        // Caso o usuário não esteja autenticado, retorne um erro ou uma mensagem apropriada
+        return res.status(401).json({ message: 'Usuário não autenticado.' });
+      }
+  
       console.log('Objetos encontrados com sucesso!');
-      res.status(200).json(foundArticle);
+      res.status(200).json(foundArticles);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -51,7 +65,6 @@ router.post('/', async (req, res) => {
   router.put('/:pid', async (req, res) => {
     const pid = req.params.pid;
     const newArticle = req.body;
-    // const newArticle = req.body.article;
     console.log(newArticle);
     try {
       const updatedArticle = await Article.findByIdAndUpdate(pid, 

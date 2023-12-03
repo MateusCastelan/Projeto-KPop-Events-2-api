@@ -18,7 +18,7 @@ const articlesSchema = new mongoose.Schema({
   
 const Article = mongoose.model('Article', articlesSchema);
 
-router.post('/cadastro', async (req, res) => {
+router.post('/cadastro', requireAuth, async (req, res) => {
     const article = req.body;
     try {
       const newArticle = await Article.create(article);
@@ -51,7 +51,22 @@ router.post('/cadastro', async (req, res) => {
     }
   });
 
-  router.get('/:pid', async (req, res) => {
+router.post('/like/:pid', async (req, res) => {
+  const pid = req.params.pid;
+
+  try {
+    const updatedArticle = await Article.findByIdAndUpdate(
+      pid,
+      { $inc: { article_liked_count: 1 } }, 
+      { new: true }
+    );
+    res.json({ message: 'Like adicionado com sucesso!', updatedArticle });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.get('/:pid', async (req, res) => {
     const pid = req.params.pid;
     try {
       const foundArticle = await Article.findById( pid );
@@ -60,9 +75,9 @@ router.post('/cadastro', async (req, res) => {
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
-  });
+});
 
-  router.put('/:pid', async (req, res) => {
+  router.put('/:pid', requireAuth, async (req, res) => {
     const pid = req.params.pid;
     const newArticle = req.body;
     console.log(newArticle);
@@ -83,7 +98,7 @@ router.post('/cadastro', async (req, res) => {
     }
   });
 
-  router.delete('/:pid', async (req, res) => {
+  router.delete('/:pid', requireAuth, async (req, res) => {
     const pid = req.params.pid;
     try {
       const deletedArticle = await Article.findByIdAndDelete(pid);

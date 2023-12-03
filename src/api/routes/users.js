@@ -98,11 +98,11 @@ router.post('/logout', (req, res) => {
   });
 });
 
-router.get('/', async (req, res) => {
+router.get('/getAll', async (req, res) => {
   try {
-    const foundUser = await User.find();
+    const users = await User.find();
     console.log('Objetos encontrados com sucesso!');
-    res.status(200).json(foundUser);
+    res.status(200).json(users);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

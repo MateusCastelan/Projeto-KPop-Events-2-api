@@ -97,24 +97,14 @@ router.post('/like/:pid', async (req, res) => {
   }
 });
 
-router.get('/edit/:id', async (req, res) => {
-  const articleId = req.params.id;
-
+router.get('/:pid', async (req, res) => {
+  const pid = req.params.pid;
   try {
-    const foundArticle = await Article.findById(articleId);
-
-    if (!foundArticle) {
-      return res.status(404).json({ message: 'Artigo não encontrado' });
-    }
-
-    // Verifique se o usuário atual pode editar o artigo
-    if (req.session.user && (req.session.user.author_level === 'admin' || req.session.user._id.toString() === foundArticle.article_author_id)) {
-      res.status(200).json(foundArticle);
-    } else {
-      res.status(403).json({ message: 'Sem permissão para editar este artigo' });
-    }
+    const foundArticle = await Article.findById(pid);
+    console.log('Objeto encontrado com sucesso!');
+    res.json({ message: 'Artigo encontrado com sucesso!', foundArticle });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: err.message });
   }
 });
 

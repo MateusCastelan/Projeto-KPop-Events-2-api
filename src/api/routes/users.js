@@ -123,6 +123,12 @@ router.put('/:pid', async (req, res) => {
   const pid = req.params.pid;
   const newUser = req.body;
   console.log(newUser);
+
+  if (newUser.author_pwd) {
+    const hashedPassword = await bcrypt.hash(newUser.author_pwd, 10);
+    newUser.author_pwd = hashedPassword;
+  }
+
   try {
     const updatedUser = await User.findByIdAndUpdate(pid, 
       { 

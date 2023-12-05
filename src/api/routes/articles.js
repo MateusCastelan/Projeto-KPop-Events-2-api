@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { requireAuth } = require('../../middleware/auth');
 
 const articlesSchema = new mongoose.Schema({
   article_title: { type: String },
@@ -20,7 +19,7 @@ articlesSchema.index({ article_keywords: 'text' })
 
 const Article = mongoose.model('Article', articlesSchema);
 
-router.post('/cadastro', requireAuth, async (req, res) => {
+router.post('/cadastro', async (req, res) => {
   const article = req.body;
   try {
     const newArticle = await Article.create(article);
@@ -58,7 +57,7 @@ router.get('/all', async (req, res) => {
 
 
 
-router.get('/', requireAuth,  async (req, res) => {
+router.get('/',  async (req, res) => {
   try {
     let foundArticles;
 
@@ -129,12 +128,11 @@ router.put('/:pid', async (req, res) => {
   }
 });
 
-router.delete('/:pid', async (req, res) => {
-  const pid = req.params.pid;
+router.delete('/delete/:articleId', async (req, res) => {
+  const articleId = req.params.articleId;
   try {
-    const deletedArticle = await Article.findByIdAndDelete(pid);
-    console.log('Objeto deletado:', deletedArticle);
-    res.json({ message: 'Artigo deletado com sucesso!', deletedArticle });
+    const deletedArticle = await Article.findByIdAndDelete(articleId);
+    res.json({ message: 'Artigo excluído com sucesso!', deletedArticle });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

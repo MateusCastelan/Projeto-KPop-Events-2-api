@@ -42,7 +42,7 @@ const sessionStore = new MongoStore({
 
 app.use(
   session({
-    secret: "sua_chave_secreta_aqui",
+    secret: "1234",
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
